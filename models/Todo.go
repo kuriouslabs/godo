@@ -17,3 +17,13 @@ func NewTodo(value string) Todo {
 		Completed: false,
 	}
 }
+
+func (t *Todo) Equal(other *Todo) bool {
+	if other == nil {
+		return false
+	}
+
+	return t.Id == other.Id &&
+		t.Value == other.Value &&
+		t.Completed == other.Completed
+}
