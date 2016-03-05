@@ -4,6 +4,15 @@ import (
 	"fmt"
 )
 
+// TodoRepoAdaptor ...
+// Provides a interface for adaptors for the TodoRepo
+type TodoRepoAdaptor interface {
+	TodoByID(id string) (*Todo, error)
+	ContainsTodo(id string) bool
+	SaveTodo(todo Todo)
+	DeleteTodo(todo Todo)
+}
+
 /// Errors
 
 type TodoNotFoundError struct {
@@ -15,41 +24,33 @@ func (e *TodoNotFoundError) Error() string {
 }
 
 /// TodoRepo
-
 type TodoRepo struct {
-	_store map[string]Todo
+	adaptor TodoRepoAdaptor
 }
 
-func NewTodoRepo() *TodoRepo {
+// NewTodoRepo instantiates a new repo
+func NewTodoRepo(adaptor TodoRepoAdaptor) *TodoRepo {
 	return &TodoRepo{
-		_store: make(map[string]Todo),
+		adaptor: adaptor,
 	}
 }
 
-/// Query Methods
-
-func (t *TodoRepo) ById(id string) (*Todo, error) {
-
-	todo, ok := t._store[id]
-	if ok {
-		return &todo, nil
-	}
-	return nil, &TodoNotFoundError{id}
+// ByID returns a Todo with the given ID
+func (t *TodoRepo) ByID(id string) (*Todo, error) {
+	return t.adaptor.TodoByID(id)
 }
 
+// Contains returns true if the todo exists in the repo
 func (t *TodoRepo) Contains(id string) bool {
-	_, ok := t._store[id]
-	return ok
+	return t.adaptor.ContainsTodo(id)
 }
 
-/// Saving
-
+// Save saves the current todo
 func (t *TodoRepo) Save(todo Todo) {
-	t._store[todo.Id] = todo
+	t.adaptor.SaveTodo(todo)
 }
 
-/// Deleting
-
+// Delete deletes the current Todo
 func (t *TodoRepo) Delete(todo Todo) {
-	delete(t._store, todo.Id)
+	t.adaptor.DeleteTodo(todo)
 }
