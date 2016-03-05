@@ -4,26 +4,32 @@ import (
 	"github.com/satori/go.uuid"
 )
 
+// Todo object
 type Todo struct {
-	Id        string `json:"id"`
+	ID        string `json:"id"`
 	Value     string `json:"name"`
 	Completed bool   `json:"completed"`
+	UserID    string `json:"user_id"`
 }
 
-func NewTodo(value string) Todo {
+// NewTodo returns a new Todo object
+func NewTodo(value string, userID string) Todo {
 	return Todo{
-		Id:        uuid.NewV4().String(),
+		ID:        uuid.NewV4().String(),
 		Value:     value,
 		Completed: false,
+		UserID:    userID,
 	}
 }
 
+// Equal returns true if the todo objects are the same
 func (t *Todo) Equal(other *Todo) bool {
 	if other == nil {
 		return false
 	}
 
-	return t.Id == other.Id &&
+	return t.ID == other.ID &&
 		t.Value == other.Value &&
-		t.Completed == other.Completed
+		t.Completed == other.Completed &&
+		t.UserID == other.UserID
 }
