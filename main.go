@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/julienschmidt/httprouter"
+	"github.com/kuriouslabs/godo/config"
 	"log"
 	"net/http"
 )
@@ -17,6 +18,9 @@ func Hello(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 func main() {
 	fmt.Println("Starting on port 5000")
+    env := config.MakeEnv()
+    fmt.Println(env)
+    
 	router := httprouter.New()
 	router.GET("/", Index)
 	router.GET("/hello/:name", Hello)
