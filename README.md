@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/kuriouslabs/godo.svg?branch=master)](https://travis-ci.org/kuriouslabs/godo)
+
 # godo
 A simple Go application to experiment with backend stuff and to learn go
 
