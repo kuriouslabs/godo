@@ -8,19 +8,21 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/kuriouslabs/godo/config"
 	"github.com/kuriouslabs/godo/controllers"
+	"github.com/kuriouslabs/godo/middleware"
+	"gopkg.in/unrolled/render.v1"
 )
-
-func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	fmt.Fprint(w, "Welcome!\n")
-}
 
 func main() {
 	fmt.Println("Starting on port 5000")
 	env := config.MakeEnv()
 
 	router := httprouter.New()
-	router.GET("/", Index)
-	router.GET("/hello/:name", controllers.Todo(env.TodoRepo).Show())
+	r := render.New(render.Options{})
+
+	// Todos
+	t := controllers.NewTodoController(env.TodoRepo)
+	router.GET("/todos/:id", middleware.Respond(r, t.Show))
+	router.POST("/todos/create", middleware.Respond(r, t.Create))
 
 	log.Fatal(http.ListenAndServe(":5000", router))
 }
