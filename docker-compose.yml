@@ -1,0 +1,18 @@
+version: '2' # omit this line iff version = 1
+services:
+  godo:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app
+    depends_on:
+      - postgres
+      - redis
+      - memcached
+  postgres:
+    image: postgres
+  redis:
+    image: redis
+  memcached:
+    image: memcached
