@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+
 	"github.com/julienschmidt/httprouter"
 	"github.com/kuriouslabs/godo/config"
 	"github.com/kuriouslabs/godo/controllers"
-	"log"
-	"net/http"
 )
 
 func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
