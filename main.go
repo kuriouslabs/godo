@@ -19,10 +19,12 @@ func main() {
 	router := httprouter.New()
 	r := render.New(render.Options{})
 
+	withAuth := middleware.Authenticated
+
 	// Todos
 	t := controllers.NewTodoController(env.TodoRepo)
-	router.GET("/todos/:id", middleware.Respond(r, t.Show))
-	router.POST("/todos/create", middleware.Respond(r, t.Create))
+	router.GET("/todos/:id", withAuth(middleware.Respond(r, t.Show)))
+	router.POST("/todos/create", withAuth(middleware.Respond(r, t.Create)))
 
 	log.Fatal(http.ListenAndServe(":5000", router))
 }
