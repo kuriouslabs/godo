@@ -1,7 +1,9 @@
-package models
+package repos
 
 import (
 	"testing"
+
+	"github.com/kuriouslabs/godo/models"
 )
 
 func makeRepo() *TodoRepo {
@@ -25,7 +27,7 @@ func TestById_ReturnsCorrectErrorForMissingTodo(t *testing.T) {
 
 func TestSave_actuallySaves(t *testing.T) {
 	repo := makeRepo()
-	todo := NewTodo("save me", "123")
+	todo := models.NewTodo("save me", "123")
 
 	if tmpTodo, _ := repo.ByID(todo.ID); tmpTodo != nil {
 		t.Error("Invalid test... todo already exists")
@@ -40,7 +42,7 @@ func TestSave_actuallySaves(t *testing.T) {
 
 func TestSaveAndById_returnsEqualObjects(t *testing.T) {
 	repo := makeRepo()
-	todo := NewTodo("save me", "123")
+	todo := models.NewTodo("save me", "123")
 
 	repo.Save(todo)
 
@@ -51,7 +53,7 @@ func TestSaveAndById_returnsEqualObjects(t *testing.T) {
 
 func TestDelete_actuallyDeletes(t *testing.T) {
 	repo := makeRepo()
-	todo := NewTodo("save me", "123")
+	todo := models.NewTodo("save me", "123")
 
 	repo.Save(todo)
 
@@ -68,8 +70,8 @@ func TestDelete_actuallyDeletes(t *testing.T) {
 
 func TestContains(t *testing.T) {
 	repo := makeRepo()
-	t1 := NewTodo("t1", "123")
-	t2 := NewTodo("t2", "123")
+	t1 := models.NewTodo("t1", "123")
+	t2 := models.NewTodo("t2", "123")
 
 	repo.Save(t1)
 

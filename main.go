@@ -14,6 +14,7 @@ import (
 
 func main() {
 	fmt.Println("Starting on port 5000")
+	// fmt.Println(middleware.GetToken("CHASE"))
 	env := config.MakeEnv()
 
 	router := httprouter.New()

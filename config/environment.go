@@ -1,17 +1,15 @@
 package config
 
-import (
-	"github.com/kuriouslabs/godo/models"
-)
+import "github.com/kuriouslabs/godo/repos"
 
 type Env struct {
-	TodoRepo *models.TodoRepo
+	TodoRepo *repos.TodoRepo
 }
 
 //TODO: Probably should pass in some sort of settings file or something
 func MakeEnv() *Env {
-	adaptor := models.NewInMemoryAdaptor()
+	adaptor := repos.NewInMemoryAdaptor()
 	return &Env{
-		TodoRepo: models.NewTodoRepo(adaptor),
+		TodoRepo: repos.NewTodoRepo(adaptor),
 	}
 }

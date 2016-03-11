@@ -1,16 +1,18 @@
-package models
+package repos
 
 import (
 	"fmt"
+
+	"github.com/kuriouslabs/godo/models"
 )
 
 // TodoRepoAdaptor ...
 // Provides a interface for adaptors for the TodoRepo
 type TodoRepoAdaptor interface {
-	TodoByID(id string) (*Todo, error)
+	TodoByID(id string) (*models.Todo, error)
 	ContainsTodo(id string) bool
-	SaveTodo(todo Todo)
-	DeleteTodo(todo Todo)
+	SaveTodo(todo models.Todo)
+	DeleteTodo(todo models.Todo)
 }
 
 /// Errors
@@ -36,7 +38,7 @@ func NewTodoRepo(adaptor TodoRepoAdaptor) *TodoRepo {
 }
 
 // ByID returns a Todo with the given ID
-func (t *TodoRepo) ByID(id string) (*Todo, error) {
+func (t *TodoRepo) ByID(id string) (*models.Todo, error) {
 	return t.adaptor.TodoByID(id)
 }
 
@@ -46,11 +48,11 @@ func (t *TodoRepo) Contains(id string) bool {
 }
 
 // Save saves the current todo
-func (t *TodoRepo) Save(todo Todo) {
+func (t *TodoRepo) Save(todo models.Todo) {
 	t.adaptor.SaveTodo(todo)
 }
 
 // Delete deletes the current Todo
-func (t *TodoRepo) Delete(todo Todo) {
+func (t *TodoRepo) Delete(todo models.Todo) {
 	t.adaptor.DeleteTodo(todo)
 }
