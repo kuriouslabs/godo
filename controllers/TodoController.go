@@ -1,20 +1,23 @@
 package controllers
 
 import (
+	"net/http"
+
 	"github.com/julienschmidt/httprouter"
 	"github.com/kuriouslabs/godo/models"
-	"net/http"
+	"github.com/kuriouslabs/godo/repos"
+	"github.com/kuriouslabs/godo/util"
 )
 
 // TodoController represents a type of controller which is
 // instantiated with a TodoRepo
 type TodoController struct {
-	todoRepo *models.TodoRepo
+	todoRepo *repos.TodoRepo
 }
 
 // NewTodoController is a convenience function for creating a
 // new TodoController with a given TodoRepo
-func NewTodoController(repo *models.TodoRepo) *TodoController {
+func NewTodoController(repo *repos.TodoRepo) *TodoController {
 	return &TodoController{
 		todoRepo: repo,
 	}
@@ -30,8 +33,9 @@ func (c *TodoController) Show(w http.ResponseWriter, r *http.Request, ps httprou
 
 // Create creates a new Todo item
 func (c *TodoController) Create(w http.ResponseWriter, r *http.Request, ps httprouter.Params) (interface{}, int) {
+	uid := util.GetUserIDFromRequest(r)
 	v := r.FormValue("todo")
-	t := models.NewTodo(v, "user-id-here")
+	t := models.NewTodo(v, uid)
 
 	c.todoRepo.Save(t)
 
