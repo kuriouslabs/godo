@@ -2,9 +2,8 @@ package main
 
 import (
 	"fmt"
-	"log"
-	"net/http"
 
+	"github.com/codegangsta/negroni"
 	"github.com/julienschmidt/httprouter"
 	"github.com/kuriouslabs/godo/config"
 	"github.com/kuriouslabs/godo/controllers"
@@ -14,18 +13,30 @@ import (
 
 func main() {
 	fmt.Println("Starting on port 5000")
-	// fmt.Println(middleware.GetToken("CHASE"))
+
 	env := config.MakeEnv()
 
 	router := httprouter.New()
 	r := render.New(render.Options{})
 
-	withAuth := middleware.Authenticated
+	register := func(h middleware.DataHandler) httprouter.Handle {
+		return middleware.Respond(r, h)
+	}
+
+	registerWithAuth := func(h middleware.DataHandler) httprouter.Handle {
+		return middleware.Authenticated(register(h))
+	}
+
+	// LogIn
+	auth := controllers.NewAuthController()
+	router.POST("/login", register(auth.LogIn))
 
 	// Todos
 	t := controllers.NewTodoController(env.TodoRepo)
-	router.GET("/todos/:id", withAuth(middleware.Respond(r, t.Show)))
-	router.POST("/todos/create", withAuth(middleware.Respond(r, t.Create)))
+	router.GET("/todos/:id", registerWithAuth(t.Show))
+	router.POST("/todos/create", registerWithAuth(t.Create))
 
-	log.Fatal(http.ListenAndServe(":5000", router))
+	n := negroni.Classic()
+	n.UseHandler(router)
+	n.Run(":5000")
 }
