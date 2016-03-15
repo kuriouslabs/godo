@@ -85,7 +85,7 @@ func validateToken(token *jwt.Token) (*jwt.Token, error) {
 func GenerateTokenForUser(uid string, expiration time.Time) string {
 	token := jwt.New(jwt.SigningMethodHS256)
 
-	token.Claims["exp"] = time.Now().Add(time.Second * time.Duration(60)).Unix()
+	token.Claims["exp"] = expiration.Unix()
 	token.Claims["iat"] = time.Now().Unix()
 	token.Claims["sub"] = uid
 
