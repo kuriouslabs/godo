@@ -1,12 +1,29 @@
 package repos
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
 )
+
+// Error constants
+var (
+	ErrTokenIsInvalid     = errors.New("Token is invalid")
+	ErrTokenIsMissing     = errors.New("Token is missing")
+	ErrTokenIsExpired     = errors.New("Token is expired")
+	ErrTokenParsingFailed = errors.New("An uknown error occurred when parsing token")
+)
+
+// TokenRepo a repo for tokens
+type TokenRepo struct{}
+
+// NewTokenRepo creates a new token repo
+func NewTokenRepo() *TokenRepo {
+	return &TokenRepo{}
+}
 
 var signingString = []byte("hello")
 
@@ -17,50 +34,65 @@ func keyParser(t *jwt.Token) (interface{}, error) {
 	return signingString, nil
 }
 
+// UserIDFromToken extracts the user-id from the token
 func UserIDFromToken(token *jwt.Token) (string, bool) {
 	uid, ok := token.Claims["sub"].(string)
 	return uid, ok
 }
 
-func ValidateTokenFromRequest(r *http.Request) (int, *jwt.Token) {
-	token, err := jwt.ParseFromRequest(r, keyParser)
+// TokenFromRequest extracts a token from the request
+func TokenFromRequest(r *http.Request) (*jwt.Token, error) {
+	return doTokenValidation(func() (*jwt.Token, error) {
+		return jwt.ParseFromRequest(r, keyParser)
+	})
+}
+
+// TokenFromString extracts a token from the string
+func TokenFromString(token string) (*jwt.Token, error) {
+	return doTokenValidation(func() (*jwt.Token, error) {
+		return jwt.Parse(token, keyParser)
+	})
+}
+
+type tokenGetAction func() (*jwt.Token, error)
+
+func doTokenValidation(tokenGetter tokenGetAction) (*jwt.Token, error) {
+	token, err := tokenGetter()
 
 	switch err.(type) {
 	case nil:
 		return validateToken(token)
 	case *jwt.ValidationError:
-		return http.StatusUnauthorized, nil
+		return nil, ErrTokenIsExpired
 	}
 
 	//TODO: Clean this up
 	if err == jwt.ErrNoTokenInRequest {
-		return http.StatusUnauthorized, nil
+		return nil, ErrTokenIsMissing
 	}
 
-	return http.StatusInternalServerError, nil // unknown error
+	return nil, ErrTokenParsingFailed
 }
 
-func validateToken(token *jwt.Token) (int, *jwt.Token) {
+func validateToken(token *jwt.Token) (*jwt.Token, error) {
 	if token.Valid {
-		return http.StatusOK, token
+		return token, nil
 	}
-	return http.StatusUnauthorized, nil
+	return nil, ErrTokenIsInvalid
 }
 
-////////// TEMP
-func GetToken(uuid string) (string, error) {
+// GenerateTokenForUser Generates a token for the user
+func GenerateTokenForUser(uid string, expiration time.Time) string {
 	token := jwt.New(jwt.SigningMethodHS256)
-	// t := time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)
-	// token.Claims["exp"] = t.Add(time.Hour * time.Duration(72)).Unix()
 
 	token.Claims["exp"] = time.Now().Add(time.Second * time.Duration(60)).Unix()
 	token.Claims["iat"] = time.Now().Unix()
-	token.Claims["sub"] = uuid
+	token.Claims["sub"] = uid
 
 	tokenString, err := token.SignedString(signingString)
 	if err != nil {
 		panic(err)
 	}
 
-	return tokenString, nil
+	return tokenString
 }
