@@ -3,6 +3,7 @@
 *.a
 *.so
 godo
+tags
 
 # Folders
 _obj
