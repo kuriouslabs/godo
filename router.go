@@ -37,11 +37,11 @@ func (r *Router) registerAuthRoutes() {
 	r.router.POST("/todos/create", r.wrapAuth(t.Create))
 }
 
-func (r *Router) wrap(h middleware.DataHandler) httprouter.Handle {
+func (r *Router) wrap(h controllers.Action) httprouter.Handle {
 	return middleware.Respond(r.env.Render, h)
 }
 
-func (r *Router) wrapAuth(h middleware.DataHandler) httprouter.Handle {
+func (r *Router) wrapAuth(h controllers.Action) httprouter.Handle {
 	return middleware.Authenticated(r.wrap(h))
 }
 

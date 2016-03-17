@@ -24,20 +24,20 @@ func NewTodoController(repo *repos.TodoRepo) *TodoController {
 }
 
 // Show returns a single Todo item
-func (c *TodoController) Show(w http.ResponseWriter, r *http.Request, ps httprouter.Params) (interface{}, int) {
+func (c *TodoController) Show(w http.ResponseWriter, r *http.Request, ps httprouter.Params) Result {
 	id := ps.ByName("id")
 	v, _ := c.todoRepo.ByID(id)
 	//TODO: make this work correctly
-	return v, 200
+	return Succeed(v)
 }
 
 // Create creates a new Todo item
-func (c *TodoController) Create(w http.ResponseWriter, r *http.Request, ps httprouter.Params) (interface{}, int) {
+func (c *TodoController) Create(w http.ResponseWriter, r *http.Request, ps httprouter.Params) Result {
 	uid := util.GetUserIDFromRequest(r)
 	v := r.FormValue("todo")
 	t := models.NewTodo(v, uid)
 
 	c.todoRepo.Save(t)
 
-	return t, 200
+	return Succeed(t)
 }
