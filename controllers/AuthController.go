@@ -22,13 +22,13 @@ func NewAuthController() *AuthController {
 }
 
 // LogIn attempt to log in
-func (c *AuthController) LogIn(w http.ResponseWriter, r *http.Request, ps httprouter.Params) (interface{}, int) {
+func (c *AuthController) LogIn(w http.ResponseWriter, r *http.Request, ps httprouter.Params) Result {
 	// for now just log the user in that was passed in
 	uid := r.FormValue("user_id")
 
 	if uid == "" {
-		// TODO: which error code should we return
-		return nil, http.StatusForbidden
+		// TODO: which error should we return
+		return Fail(ErrFIXME)
 	}
 
 	// TODO: validate login
@@ -39,8 +39,8 @@ func (c *AuthController) LogIn(w http.ResponseWriter, r *http.Request, ps httpro
 	//TODO: use the UserRepo
 	user := models.NewUser("user123", uid)
 
-	return map[string]interface{}{
+	return Succeed(map[string]interface{}{
 		"token": token,
 		"user":  user,
-	}, http.StatusOK
+	})
 }
