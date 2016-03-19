@@ -5,7 +5,8 @@ type Error struct {
 }
 
 var (
-	ErrBadRequest = NewError("Bad Request")
+	ErrBadRequest   = NewError("Bad Request")
+	ErrUnauthorized = NewError("Not authorized")
 )
 
 func NewError(msg string) *Error {

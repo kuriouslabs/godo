@@ -7,6 +7,7 @@ import (
 
 type Env struct {
 	TodoRepo *repos.TodoRepo
+	UserRepo *repos.UserRepo
 	Render   *render.Render
 }
 
@@ -15,6 +16,7 @@ func MakeEnv() *Env {
 	adaptor := repos.NewInMemoryAdaptor()
 	return &Env{
 		TodoRepo: repos.NewTodoRepo(adaptor),
+		UserRepo: repos.NewUserRepo(adaptor),
 		Render:   render.New(render.Options{}),
 	}
 }

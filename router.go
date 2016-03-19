@@ -26,7 +26,7 @@ func NewRouter(env *config.Env) *Router {
 
 func (r *Router) registerRoutes() {
 	// LogIn
-	auth := controllers.NewAuthController()
+	auth := controllers.NewAuthController(r.env)
 	r.router.POST("/login", r.wrap(auth.LogIn))
 }
 
