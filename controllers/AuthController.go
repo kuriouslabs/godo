@@ -27,8 +27,7 @@ func (c *AuthController) LogIn(w http.ResponseWriter, r *http.Request, ps httpro
 	uid := r.FormValue("user_id")
 
 	if uid == "" {
-		// TODO: which error should we return
-		return Fail(ErrFIXME)
+		return Fail(ErrBadRequest, "missing parameter user_id")
 	}
 
 	// TODO: validate login

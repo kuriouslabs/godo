@@ -17,20 +17,25 @@ type DataHandler func(w http.ResponseWriter, r *http.Request, ps httprouter.Para
 func Respond(render *render.Render, dh controllers.Action) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		result := dh(w, r, ps)
-		if err := result.Error; err != nil {
-			//TODO: Map error codes
-			render.JSON(w, mapError(err), "")
+		if result.Error != nil {
+			statusCode := mapError(result.Error)
+			errMessage := map[string]string{
+				"error":  http.StatusText(statusCode),
+				"reason": result.Reason,
+			}
+
+			render.JSON(w, statusCode, errMessage)
 		} else {
-			render.JSON(w, 200, result.Value)
+			render.JSON(w, http.StatusOK, result.Value)
 		}
 	}
 }
 
 func mapError(err *controllers.Error) int {
 	switch err {
-	case controllers.ErrFIXME:
-		return 303
+	case controllers.ErrBadRequest:
+		return http.StatusBadRequest
 	default:
-		return 500
+		return http.StatusInternalServerError
 	}
 }

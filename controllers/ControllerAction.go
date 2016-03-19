@@ -7,23 +7,12 @@ import (
 )
 
 type Result struct {
-	Value interface{}
-	Error *Error
+	Value  interface{}
+	Error  *Error
+	Reason string
 }
 
 type Action func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) Result
-
-type Error struct {
-	err string
-}
-
-var (
-	ErrFIXME = &Error{"FIX ME"}
-)
-
-func (e Error) Error() string {
-	return e.err
-}
 
 func Succeed(val interface{}) Result {
 	return Result{
@@ -31,8 +20,9 @@ func Succeed(val interface{}) Result {
 	}
 }
 
-func Fail(err *Error) Result {
+func Fail(err *Error, reason string) Result {
 	return Result{
-		Error: err,
+		Error:  err,
+		Reason: reason,
 	}
 }
