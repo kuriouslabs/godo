@@ -5,48 +5,42 @@ import (
 	"time"
 
 	"github.com/julienschmidt/httprouter"
-	"github.com/kuriouslabs/godo/config"
 	"github.com/kuriouslabs/godo/repos"
+	"github.com/kuriouslabs/godo/util"
 )
 
 // AuthController a controller for handling auth
 type AuthController struct {
-	env *config.Env
+	Controller
 }
 
 // NewAuthController creates a new auth controller
-func NewAuthController(env *config.Env) *AuthController {
+func NewAuthController() *AuthController {
 	return &AuthController{
-		env: env,
+		Controller: NewController(),
 	}
 }
 
 // LogIn attempt to log in
 func (c *AuthController) LogIn(w http.ResponseWriter, r *http.Request, ps httprouter.Params) Result {
 	// for now just log the user in that was passed in
-	uid := r.FormValue("user_id")
-	pw := r.FormValue("password")
+	v := util.NewValidator(r)
+	uid := v.String("user_id")
+	pw := v.String("password")
 
-	//TODO: figure out a better validation scheme
-	if uid == "" {
-		return Fail(ErrBadRequest, "missing parameter user_id")
-	}
+	return c.AfterValidation(v, func() Result {
+		if !c.env.UserRepo.AuthenticateUserPassword(uid, pw) {
+			return Fail(ErrUnauthorized, "invalid username or password")
+		}
 
-	if pw == "" {
-		return Fail(ErrBadRequest, "missing parameter password")
-	}
+		exp := time.Now().Add(time.Hour * time.Duration(72))
+		token := repos.GenerateTokenForUser(uid, exp)
 
-	if !c.env.UserRepo.AuthenticateUserPassword(uid, pw) {
-		return Fail(ErrUnauthorized, "invalid username or password")
-	}
+		user, _ := c.env.UserRepo.ByID(uid)
 
-	exp := time.Now().Add(time.Hour * time.Duration(72))
-	token := repos.GenerateTokenForUser(uid, exp)
-
-	user, _ := c.env.UserRepo.ByID(uid)
-
-	return Succeed(map[string]interface{}{
-		"token": token,
-		"user":  user,
+		return Succeed(map[string]interface{}{
+			"token": token,
+			"user":  user,
+		})
 	})
 }

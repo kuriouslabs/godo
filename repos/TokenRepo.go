@@ -25,7 +25,7 @@ func NewTokenRepo() *TokenRepo {
 	return &TokenRepo{}
 }
 
-var signingString = []byte("hello")
+var signingString = []byte("1EguuHf87tJO7Z0p91b439PGtsqyw12V")
 
 func keyParser(t *jwt.Token) (interface{}, error) {
 	if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
