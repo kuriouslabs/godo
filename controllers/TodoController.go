@@ -5,28 +5,26 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/kuriouslabs/godo/models"
-	"github.com/kuriouslabs/godo/repos"
 	"github.com/kuriouslabs/godo/util"
 )
 
 // TodoController represents a type of controller which is
 // instantiated with a TodoRepo
 type TodoController struct {
-	todoRepo *repos.TodoRepo
+	Controller
 }
 
-// NewTodoController is a convenience function for creating a
-// new TodoController with a given TodoRepo
-func NewTodoController(repo *repos.TodoRepo) *TodoController {
+// NewTodoController is a convenience function for creating a new todo controller
+func NewTodoController() *TodoController {
 	return &TodoController{
-		todoRepo: repo,
+		Controller: NewController(),
 	}
 }
 
 // Show returns a single Todo item
 func (c *TodoController) Show(w http.ResponseWriter, r *http.Request, ps httprouter.Params) Result {
 	id := ps.ByName("id")
-	v, _ := c.todoRepo.ByID(id)
+	v, _ := c.env.TodoRepo.ByID(id)
 	//TODO: make this work correctly
 	return Succeed(v)
 }
@@ -34,10 +32,14 @@ func (c *TodoController) Show(w http.ResponseWriter, r *http.Request, ps httprou
 // Create creates a new Todo item
 func (c *TodoController) Create(w http.ResponseWriter, r *http.Request, ps httprouter.Params) Result {
 	uid := util.GetUserIDFromRequest(r)
-	v := r.FormValue("todo")
-	t := models.NewTodo(v, uid)
+	v := util.NewValidator(r)
+	todoValue := v.String("todo")
 
-	c.todoRepo.Save(t)
+	return c.AfterValidation(v, func() Result {
+		t := models.NewTodo(todoValue, uid)
 
-	return Succeed(t)
+		c.env.TodoRepo.Save(t)
+
+		return Succeed(t)
+	})
 }
