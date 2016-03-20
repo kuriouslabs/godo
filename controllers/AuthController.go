@@ -40,7 +40,7 @@ func (c *AuthController) LogIn(w http.ResponseWriter, r *http.Request, ps httpro
 		return Fail(ErrUnauthorized, "invalid username or password")
 	}
 
-	exp := time.Now().Add(time.Second * time.Duration(60))
+	exp := time.Now().Add(time.Hour * time.Duration(72))
 	token := repos.GenerateTokenForUser(uid, exp)
 
 	user, _ := c.env.UserRepo.ByID(uid)
