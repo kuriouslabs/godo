@@ -41,6 +41,9 @@ func (r *Router) registerAuthRoutes() {
 	t := controllers.NewTodoController()
 	r.router.GET("/todos/:id", r.wrapAuth(t.Show))
 	r.router.POST("/todos/create", r.wrapAuth(t.Create))
+
+	user := controllers.NewUserController()
+	r.router.GET("/user", r.wrapAuth(user.Me))
 }
 
 func (r *Router) wrap(h controllers.Action) httprouter.Handle {

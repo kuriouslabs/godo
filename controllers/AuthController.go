@@ -25,18 +25,17 @@ func NewAuthController() *AuthController {
 func (c *AuthController) LogIn(w http.ResponseWriter, r *http.Request, ps httprouter.Params) Result {
 	// for now just log the user in that was passed in
 	v := util.NewValidator(r)
-	uid := v.String("user_id")
+	username := v.String("username")
 	pw := v.String("password")
 
 	return c.AfterValidation(v, func() Result {
-		if !c.env.UserRepo.AuthenticateUserPassword(uid, pw) {
+		user := c.env.UserRepo.AuthenticateUserPassword(username, pw)
+		if user == nil {
 			return Fail(ErrUnauthorized, "invalid username or password")
 		}
 
 		exp := time.Now().Add(time.Hour * time.Duration(72))
-		token := repos.GenerateTokenForUser(uid, exp)
-
-		user, _ := c.env.UserRepo.ByID(uid)
+		token := repos.GenerateTokenForUser(user.ID, exp)
 
 		return Succeed(map[string]interface{}{
 			"token": token,

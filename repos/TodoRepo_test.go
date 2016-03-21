@@ -20,7 +20,7 @@ func TestById_ReturnsCorrectErrorForMissingTodo(t *testing.T) {
 		t.Errorf("should not return a Todo: got %v", todo)
 	}
 
-	if _, ok := err.(*TodoNotFoundError); !ok {
+	if err != ErrTodoNotFound {
 		t.Errorf("Returned wrong error type: got %v", err)
 	}
 }
