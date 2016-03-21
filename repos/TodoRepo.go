@@ -1,7 +1,7 @@
 package repos
 
 import (
-	"fmt"
+	"errors"
 
 	"github.com/kuriouslabs/godo/models"
 )
@@ -15,15 +15,9 @@ type TodoRepoAdaptor interface {
 	DeleteTodo(todo models.Todo)
 }
 
-/// Errors
-
-type TodoNotFoundError struct {
-	Id string
-}
-
-func (e *TodoNotFoundError) Error() string {
-	return fmt.Sprintf("Cannot find Todo with id: '%s'", e.Id)
-}
+var (
+	ErrTodoNotFound = errors.New("Cannot find todo")
+)
 
 /// TodoRepo
 type TodoRepo struct {

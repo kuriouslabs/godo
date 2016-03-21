@@ -5,8 +5,9 @@ type Error struct {
 }
 
 var (
-	ErrBadRequest   = NewError("Bad Request")
-	ErrUnauthorized = NewError("Not authorized")
+	ErrBadRequest           = NewError("Bad Request")
+	ErrUnauthorized         = NewError("Not authorized")
+	ErrEntityCreationFailed = NewError("Creation of entity failed")
 )
 
 func NewError(msg string) *Error {
