@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/julienschmidt/httprouter"
+	"github.com/kuriouslabs/godo/models"
 	"github.com/kuriouslabs/godo/repos"
 	"github.com/kuriouslabs/godo/util"
 )
@@ -34,12 +35,56 @@ func (c *AuthController) LogIn(w http.ResponseWriter, r *http.Request, ps httpro
 			return Fail(ErrUnauthorized, "invalid username or password")
 		}
 
-		exp := time.Now().Add(time.Hour * time.Duration(72))
-		token := repos.GenerateTokenForUser(user.ID, exp)
+		token, exp := generateToken(user)
+		refreshToken := c.env.TokenRepo.GenerateRefreshTokenForUser(user.ID)
+
+		return Succeed(map[string]interface{}{
+			"token":   token,
+			"user":    user,
+			"exp":     exp,
+			"refresh": refreshToken,
+		})
+	})
+}
+
+func (c *AuthController) LogOut(w http.ResponseWriter, r *http.Request, ps httprouter.Params) Result {
+	uid := util.GetUserIDFromRequest(r)
+
+	c.env.TokenRepo.RevokeRefreshTokenForUser(uid)
+	//TODO: Revoke the current jwt-token as well?
+	return Succeed("")
+}
+
+// RefreshToken refreshes the given token
+func (c *AuthController) RefreshToken(w http.ResponseWriter,
+	r *http.Request, ps httprouter.Params) Result {
+	v := util.NewValidator(r)
+	refreshToken := v.String("refresh_token")
+	uid := v.String("user_id")
+
+	return c.AfterValidation(v, func() Result {
+		if !c.env.TokenRepo.ValidateRefreshToken(refreshToken, uid) {
+			return Fail(ErrUnauthorized, "invalid refresh token")
+		}
+
+		user, err := c.env.UserRepo.ByID(uid)
+
+		if err != nil {
+			return Fail(ErrBadRequest, "Could not find user for refresh token")
+		}
+
+		token, exp := generateToken(user)
 
 		return Succeed(map[string]interface{}{
 			"token": token,
 			"user":  user,
+			"exp":   exp,
 		})
 	})
+}
+
+func generateToken(user *models.User) (string, time.Time) {
+	exp := time.Now().Add(time.Hour * time.Duration(1))
+	token := repos.GenerateTokenForUser(user.ID, exp)
+	return token, exp
 }

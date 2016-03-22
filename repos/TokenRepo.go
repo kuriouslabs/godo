@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/satori/go.uuid"
 )
 
 // Error constants
@@ -18,11 +19,15 @@ var (
 )
 
 // TokenRepo a repo for tokens
-type TokenRepo struct{}
+type TokenRepo struct {
+	refreshTokens map[string]string
+}
 
 // NewTokenRepo creates a new token repo
 func NewTokenRepo() *TokenRepo {
-	return &TokenRepo{}
+	return &TokenRepo{
+		refreshTokens: make(map[string]string),
+	}
 }
 
 var signingString = []byte("1EguuHf87tJO7Z0p91b439PGtsqyw12V")
@@ -95,4 +100,32 @@ func GenerateTokenForUser(uid string, expiration time.Time) string {
 	}
 
 	return tokenString
+}
+
+// ValidateRefreshToken returns a user from the given refresh
+// token and user id
+func (r *TokenRepo) ValidateRefreshToken(token string, uid string) bool {
+	if storedUserID, ok := r.refreshTokens[token]; ok {
+		return storedUserID == uid
+	}
+	return false
+}
+
+func (r *TokenRepo) GenerateRefreshTokenForUser(uid string) string {
+	token := uuid.NewV4().String()
+	r.refreshTokens[token] = uid
+	return token
+}
+
+func (r *TokenRepo) RevokeRefreshTokenForUser(uid string) {
+	var tokens []string
+	for k, v := range r.refreshTokens {
+		if v == uid {
+			tokens = append(tokens, k)
+		}
+	}
+
+	for _, token := range tokens {
+		delete(r.refreshTokens, token)
+	}
 }
