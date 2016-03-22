@@ -29,10 +29,10 @@ func (r *Router) registerRoutes() {
 	// LogIn
 	auth := controllers.NewAuthController()
 	r.router.POST("/login", r.wrap(auth.LogIn))
+	r.router.POST("/token/refresh", r.wrap(auth.RefreshToken))
 
 	// User
 	user := controllers.NewUserController()
-	r.router.GET("/me", r.wrap(user.Me))
 	r.router.POST("/user/create", r.wrap(user.Create))
 }
 
@@ -41,6 +41,9 @@ func (r *Router) registerAuthRoutes() {
 	t := controllers.NewTodoController()
 	r.router.GET("/todos/:id", r.wrapAuth(t.Show))
 	r.router.POST("/todos/create", r.wrapAuth(t.Create))
+
+	auth := controllers.NewAuthController()
+	r.router.POST("/logout", r.wrapAuth(auth.LogOut))
 
 	user := controllers.NewUserController()
 	r.router.GET("/user", r.wrapAuth(user.Me))
