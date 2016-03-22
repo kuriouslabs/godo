@@ -7,7 +7,6 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/kuriouslabs/godo/controllers"
-	"github.com/kuriouslabs/godo/middleware"
 )
 
 type Router struct {
@@ -47,11 +46,11 @@ func (r *Router) registerAuthRoutes() {
 }
 
 func (r *Router) wrap(h controllers.Action) httprouter.Handle {
-	return middleware.Respond(r.Render, h)
+	return controllers.Render(r.Render, h)
 }
 
 func (r *Router) wrapAuth(h controllers.Action) httprouter.Handle {
-	return middleware.Authenticated(r.wrap(h))
+	return r.wrap(controllers.Authenticated(h))
 }
 
 // ServeHTTP allows us to be a http.Handler
