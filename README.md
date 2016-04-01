@@ -17,3 +17,5 @@ docker-compose run --rm godo env
 docker-compose down
 ```
 To verify that everything is working `curl $(docker-machine ip default):$(docker port godo 5000 | awk -F: '{ print $2 }')/`.
+TEST
+TEST
